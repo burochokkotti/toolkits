@@ -1,0 +1,32 @@
+{
+  "name": "universal-memory-mcp",
+  "version": "1.0.0",
+  "description": "Universal Memory MCP Server with HTTP API support",
+  "main": "simple_mcp_server.js",
+  "scripts": {
+    "start": "node simple_mcp_server.js",
+    "http": "node simple_mcp_server.js --http",
+    "both": "node simple_mcp_server.js --both",
+    "dev": "node --watch simple_mcp_server.js",
+    "test": "node -e \"console.log('Universal Memory MCP Server - Ready!')\""
+  },
+  "keywords": [
+    "mcp",
+    "memory",
+    "ai",
+    "claude",
+    "cursor",
+    "universal",
+    "context"
+  ],
+  "author": "Universal Memory Team",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

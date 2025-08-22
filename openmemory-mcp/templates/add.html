@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>➕ Add Memory - Universal Memory</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .nav a {
+            color: #495057;
+            text-decoration: none;
+            margin-right: 25px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav a:hover, .nav a.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .form-group textarea:focus, 
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .help-text {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+        
+        .btn:hover {
+            background: #1e7e34;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            margin-left: 15px;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .examples {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .examples h4 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+        
+        .example-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .example-content {
+            font-style: italic;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .example-tags {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>➕ Add Memory</h1>
+            <p>Store important knowledge for future reference</p>
+        </div>
+        
+        <nav class="nav">
+            <a href="/">All Memories</a>
+            <a href="/search">Search</a>
+            <a href="/add" class="active">Add Memory</a>
+            <a href="/context">Get Context</a>
+            <a href="/stats">Statistics</a>
+        </nav>
+        
+        <div class="content">
+            {% if error %}
+                <div class="error">
+                    <strong>Error:</strong> {{ error }}
+                </div>
+            {% endif %}
+            
+            <div class="examples">
+                <h4>💡 Example Memories</h4>
+                <div class="example-item">
+                    <div class="example-content">"We decided to use PostgreSQL as the main database with Redis for caching"</div>
+                    <div class="example-tags">Tags: database, architecture, decision</div>
+                </div>
+                <div class="example-item">
+                    <div class="example-content">"Authentication uses JWT tokens with 7-day expiry and refresh mechanism"</div>
+                    <div class="example-tags">Tags: auth, jwt, security</div>
+                </div>
+                <div class="example-item">
+                    <div class="example-content">"API rate limit is 100 requests per minute per user, implement exponential backoff"</div>
+                    <div class="example-tags">Tags: api, rate-limiting, requirements</div>
+                </div>
+            </div>
+            
+            <form method="post">
+                <div class="form-group">
+                    <label for="content">Memory Content *</label>
+                    <textarea 
+                        id="content" 
+                        name="content" 
+                        placeholder="Enter the information you want to remember..."
+                        required
+                        autofocus
+                    >{{ content if content else '' }}</textarea>
+                    <div class="help-text">
+                        Describe decisions, solutions, requirements, or any important context you want to remember.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tags">Tags (Optional)</label>
+                    <input 
+                        type="text" 
+                        id="tags" 
+                        name="tags" 
+                        value="{{ tags if tags else '' }}"
+                        placeholder="database, architecture, decision (comma-separated)"
+                    />
+                    <div class="help-text">
+                        Add tags to categorize your memory (e.g., architecture, decision, api, frontend, backend)
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn">💾 Save Memory</button>
+                    <a href="/" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('content');
+            const tagsInput = document.getElementById('tags');
+            
+            // Auto-resize textarea
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+            
+            // Tag suggestions based on common categories
+            const tagSuggestions = [
+                'architecture', 'decision', 'requirements', 'solution',
+                'database', 'api', 'frontend', 'backend', 'auth', 
+                'security', 'performance', 'deployment', 'testing',
+                'bug', 'feature', 'documentation', 'config'
+            ];
+            
+            // Simple tag autocomplete
+            tagsInput.addEventListener('input', function() {
+                const value = this.value.toLowerCase();
+                const lastTag = value.split(',').pop().trim();
+                
+                if (lastTag.length > 1) {
+                    const matches = tagSuggestions.filter(tag => 
+                        tag.startsWith(lastTag) && !value.includes(tag)
+                    );
+                    
+                    // Simple suggestion (could be enhanced with dropdown)
+                    if (matches.length === 1 && lastTag !== matches[0]) {
+                        console.log('Suggestion:', matches[0]);
+                    }
+                }
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + Enter to submit
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    document.querySelector('form').submit();
+                }
+            });
+            
+            // Character counter for content
+            textarea.addEventListener('input', function() {
+                const length = this.value.length;
+                let helpText = this.parentNode.querySelector('.help-text');
+                
+                if (length > 500) {
+                    helpText.innerHTML = `Describe decisions, solutions, requirements, or any important context you want to remember. <strong>${length} characters</strong>`;
+                    helpText.style.color = length > 1000 ? '#dc3545' : '#ffc107';
+                } else {
+                    helpText.innerHTML = 'Describe decisions, solutions, requirements, or any important context you want to remember.';
+                    helpText.style.color = '#6c757d';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

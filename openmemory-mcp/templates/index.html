@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Universal Memory</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .nav a {
+            color: #495057;
+            text-decoration: none;
+            margin-right: 25px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav a:hover, .nav a.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .search-bar {
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        
+        .memories {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .memory-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        
+        .memory-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .memory-content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .memory-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .memory-tags {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .tag {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .stats {
+                flex-direction: column;
+            }
+            
+            .search-form {
+                flex-direction: column;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Universal Memory</h1>
+            <p>Your persistent AI memory across all projects</p>
+        </div>
+        
+        <nav class="nav">
+            <a href="/" class="active">All Memories</a>
+            <a href="/search">Search</a>
+            <a href="/add">Add Memory</a>
+            <a href="/context">Get Context</a>
+            <a href="/stats">Statistics</a>
+        </nav>
+        
+        <div class="content">
+            {% if error %}
+                <div class="error">
+                    <strong>Error:</strong> {{ error }}
+                </div>
+            {% endif %}
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number">{{ total }}</div>
+                    <div class="stat-label">Total Memories</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ (memories | length) if memories else 0 }}</div>
+                    <div class="stat-label">Displayed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">✓</div>
+                    <div class="stat-label">System Active</div>
+                </div>
+            </div>
+            
+            <div class="search-bar">
+                <form class="search-form" action="/search" method="get">
+                    <input type="text" name="q" placeholder="Search memories..." />
+                    <button type="submit" class="btn">Search</button>
+                </form>
+                <br>
+                <a href="/add" class="btn btn-success">+ Add New Memory</a>
+            </div>
+            
+            {% if memories %}
+                <div class="memories">
+                    {% for memory in memories %}
+                        <div class="memory-card">
+                            <div class="memory-content">{{ memory.content }}</div>
+                            <div class="memory-meta">
+                                <div class="memory-id">ID: {{ memory.id }}</div>
+                                <div class="memory-tags">
+                                    {% if memory.metadata and memory.metadata.tags %}
+                                        {% for tag in memory.metadata.tags %}
+                                            <span class="tag">{{ tag }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>No memories stored yet</h3>
+                    <p>Start building your knowledge base by adding your first memory!</p>
+                    <br>
+                    <a href="/add" class="btn btn-success">+ Add Your First Memory</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        // Simple client-side enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add keyboard shortcut for search (Ctrl/Cmd + K)
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    const searchInput = document.querySelector('input[name="q"]');
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                }
+            });
+            
+            // Auto-refresh every 30 seconds if page is visible
+            let refreshInterval = setInterval(() => {
+                if (!document.hidden) {
+                    location.reload();
+                }
+            }, 30000);
+            
+            // Clear interval when page becomes hidden
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    clearInterval(refreshInterval);
+                } else {
+                    refreshInterval = setInterval(() => {
+                        location.reload();
+                    }, 30000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

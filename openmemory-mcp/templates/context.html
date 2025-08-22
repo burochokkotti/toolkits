@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Get Context - Universal Memory</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .nav a {
+            color: #495057;
+            text-decoration: none;
+            margin-right: 25px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav a:hover, .nav a.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .context-section {
+            margin-bottom: 30px;
+        }
+        
+        .context-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        .context-result {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        .context-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .context-topic {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .context-badge {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .context-content {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #333;
+            white-space: pre-line;
+        }
+        
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .example-card {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .example-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .example-title {
+            font-weight: 600;
+            color: #155724;
+            margin-bottom: 8px;
+        }
+        
+        .example-desc {
+            font-size: 14px;
+            color: #155724;
+            opacity: 0.8;
+        }
+        
+        .tips {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .tips h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .tips ul {
+            color: #1976d2;
+            margin-left: 20px;
+        }
+        
+        .tips li {
+            margin-bottom: 5px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .context-form {
+                flex-direction: column;
+            }
+            
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Get Context</h1>
+            <p>Retrieve relevant context and knowledge for any topic</p>
+        </div>
+        
+        <nav class="nav">
+            <a href="/">All Memories</a>
+            <a href="/search">Search</a>
+            <a href="/add">Add Memory</a>
+            <a href="/context" class="active">Get Context</a>
+            <a href="/stats">Statistics</a>
+        </nav>
+        
+        <div class="content">
+            {% if error %}
+                <div class="error">
+                    <strong>Error:</strong> {{ error }}
+                </div>
+            {% endif %}
+            
+            <div class="context-section">
+                <form class="context-form" method="get">
+                    <input 
+                        type="text" 
+                        name="topic" 
+                        value="{{ topic }}" 
+                        placeholder="What topic do you need context for?"
+                        autofocus
+                    />
+                    <button type="submit" class="btn">Get Context</button>
+                </form>
+            </div>
+            
+            {% if not topic and not context %}
+                <div class="examples-grid">
+                    <div class="example-card" onclick="getContext('authentication')">
+                        <div class="example-title">🔐 Authentication</div>
+                        <div class="example-desc">Get context about auth decisions, JWT setup, security measures</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="getContext('database')">
+                        <div class="example-title">🗄️ Database</div>
+                        <div class="example-desc">Retrieve database architecture, schema decisions, queries</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="getContext('API design')">
+                        <div class="example-title">🔗 API Design</div>
+                        <div class="example-desc">Find API structure, endpoint definitions, standards</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="getContext('frontend')">
+                        <div class="example-title">🎨 Frontend</div>
+                        <div class="example-desc">Get UI framework decisions, component patterns, styles</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="getContext('deployment')">
+                        <div class="example-title">🚀 Deployment</div>
+                        <div class="example-desc">Retrieve deployment configs, infrastructure decisions</div>
+                    </div>
+                    
+                    <div class="example-card" onclick="getContext('testing')">
+                        <div class="example-title">🧪 Testing</div>
+                        <div class="example-desc">Find testing strategies, frameworks, test patterns</div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if topic and context %}
+                <div class="context-result">
+                    <div class="context-header">
+                        <div class="context-topic">{{ topic }}</div>
+                        <div class="context-badge">Context Retrieved</div>
+                    </div>
+                    <div class="context-content">{{ context }}</div>
+                </div>
+            {% elif topic and not context %}
+                <div class="empty-state">
+                    <h3>No context found</h3>
+                    <p>No relevant memories found for "{{ topic }}". Try adding some memories first or use different keywords.</p>
+                </div>
+            {% endif %}
+            
+            <div class="tips">
+                <h4>💡 Context Tips</h4>
+                <ul>
+                    <li><strong>Be specific:</strong> "user authentication JWT" vs "auth"</li>
+                    <li><strong>Use project terms:</strong> Include specific technologies or frameworks</li>
+                    <li><strong>Ask about processes:</strong> "deployment process", "testing strategy"</li>
+                    <li><strong>Focus on decisions:</strong> "database choice", "architecture decisions"</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function getContext(topic) {
+            const input = document.querySelector('input[name="topic"]');
+            input.value = topic;
+            input.form.submit();
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.querySelector('input[name="topic"]');
+            
+            // Focus input if no topic set
+            if (input && !input.value) {
+                input.focus();
+            }
+            
+            // Submit on Enter
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.form.submit();
+                }
+            });
+            
+            // Auto-suggestions based on common topics
+            const commonTopics = [
+                'authentication', 'database', 'API design', 'frontend', 'backend',
+                'deployment', 'testing', 'security', 'performance', 'architecture',
+                'user interface', 'data flow', 'error handling', 'logging',
+                'monitoring', 'caching', 'rate limiting', 'validation'
+            ];
+            
+            // Simple autocomplete
+            input.addEventListener('input', function() {
+                const value = this.value.toLowerCase();
+                if (value.length > 2) {
+                    const matches = commonTopics.filter(topic => 
+                        topic.toLowerCase().includes(value)
+                    );
+                    
+                    // Could implement dropdown here
+                    if (matches.length > 0) {
+                        console.log('Suggestions:', matches.slice(0, 5));
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

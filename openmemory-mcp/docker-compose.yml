@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: openmemory-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+    networks:
+      - openmemory-network
+
+  mem0-api:
+    build: 
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: openmemory-api
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - QDRANT_URL=http://qdrant:6333
+      - PROJECT_ID=${PROJECT_ID:-pi-risk-mlops}
+      - MEMORY_COLLECTION=${MEMORY_COLLECTION:-mlops_memories}
+    depends_on:
+      - qdrant
+    volumes:
+      - ./data/memories:/app/data
+    restart: unless-stopped
+    networks:
+      - openmemory-network
+
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    container_name: openmemory-mcp
+    ports:
+      - "3000:3000"
+    environment:
+      - API_URL=http://mem0-api:8080
+      - MEMORY_DB_PATH=/data/mlops.sqlite
+      - PROJECT_ID=${PROJECT_ID:-pi-risk-mlops}
+    volumes:
+      - ./data/memories:/data
+    depends_on:
+      - mem0-api
+    restart: unless-stopped
+    networks:
+      - openmemory-network
+
+networks:
+  openmemory-network:
+    driver: bridge
+
+volumes:
+  qdrant-data:
+    driver: local
+  memory-data:
+    driver: local

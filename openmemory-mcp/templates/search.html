@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Search Memories - Universal Memory</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .nav {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .nav a {
+            color: #495057;
+            text-decoration: none;
+            margin-right: 25px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav a:hover, .nav a.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .search-section {
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+        
+        .results-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .results-count {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .results {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .result-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .result-score {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        .search-tips {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .search-tips h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .search-tips ul {
+            color: #1976d2;
+            margin-left: 20px;
+        }
+        
+        .search-tips li {
+            margin-bottom: 5px;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Search Memories</h1>
+            <p>Find relevant knowledge from your memory bank</p>
+        </div>
+        
+        <nav class="nav">
+            <a href="/">All Memories</a>
+            <a href="/search" class="active">Search</a>
+            <a href="/add">Add Memory</a>
+            <a href="/context">Get Context</a>
+            <a href="/stats">Statistics</a>
+        </nav>
+        
+        <div class="content">
+            {% if error %}
+                <div class="error">
+                    <strong>Error:</strong> {{ error }}
+                </div>
+            {% endif %}
+            
+            <div class="search-section">
+                <form class="search-form" method="get">
+                    <input 
+                        type="text" 
+                        name="q" 
+                        value="{{ query }}" 
+                        placeholder="Search for decisions, solutions, requirements..."
+                        autofocus
+                    />
+                    <button type="submit" class="btn">Search</button>
+                </form>
+            </div>
+            
+            {% if query %}
+                <div class="results-header">
+                    <h2>Search Results</h2>
+                    <div class="results-count">
+                        Found {{ results|length }} memories for "{{ query }}"
+                    </div>
+                </div>
+                
+                {% if results %}
+                    <div class="results">
+                        {% for result in results %}
+                            <div class="result-card">
+                                <div class="result-content">
+                                    {{ result.content or result }}
+                                </div>
+                                <div class="result-meta">
+                                    <div>
+                                        {% if result.id %}
+                                            ID: {{ result.id }}
+                                        {% endif %}
+                                    </div>
+                                    {% if result.score %}
+                                        <div class="result-score">
+                                            {{ (result.score * 100) | round }}% match
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <h3>No results found</h3>
+                        <p>Try different keywords or check the search tips below</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+            
+            <div class="search-tips">
+                <h4>💡 Search Tips</h4>
+                <ul>
+                    <li><strong>Be specific:</strong> "database PostgreSQL" instead of just "database"</li>
+                    <li><strong>Use key terms:</strong> "authentication JWT" or "API endpoints"</li>
+                    <li><strong>Try categories:</strong> "decision", "architecture", "requirements"</li>
+                    <li><strong>Include context:</strong> "frontend React components" or "backend services"</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[name="q"]');
+            
+            // Focus search input
+            if (searchInput && !searchInput.value) {
+                searchInput.focus();
+            }
+            
+            // Highlight search terms in results
+            const query = "{{ query }}";
+            if (query) {
+                const terms = query.toLowerCase().split(' ');
+                const resultContents = document.querySelectorAll('.result-content');
+                
+                resultContents.forEach(element => {
+                    let html = element.innerHTML;
+                    terms.forEach(term => {
+                        if (term.length > 2) { // Only highlight terms longer than 2 chars
+                            const regex = new RegExp(`(${term})`, 'gi');
+                            html = html.replace(regex, '<span class="highlight">$1</span>');
+                        }
+                    });
+                    element.innerHTML = html;
+                });
+            }
+            
+            // Search on Enter
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.form.submit();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
