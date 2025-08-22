@@ -31,11 +31,20 @@ const PYTHON_PATH = process.env.PYTHON_PATH || 'python3';
  */
 function executePython(command) {
   return new Promise((resolve, reject) => {
-    const pythonScript = `
-import sys
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] Executing Python command: ${command.substring(0, 100)}...`);
+    
+    const pythonScript = `import sys
+import traceback
 sys.path.append('${process.cwd()}')
-from simple_memory import memory
-${command}
+
+try:
+    from simple_memory import memory
+    ${command}
+except Exception as e:
+    print(f"ERROR: {str(e)}")
+    traceback.print_exc()
+    sys.exit(1)
 `;
     
     const child = spawn(PYTHON_PATH, ['-c', pythonScript]);
@@ -50,21 +59,42 @@ ${command}
       stderr += data.toString();
     });
     
+    const timeout = setTimeout(() => {
+      console.log(`[${timestamp}] Python command timed out, killing process`);
+      child.kill();
+      reject(new Error('Python command timed out after 30 seconds'));
+    }, 30000);
+    
     child.on('close', (code) => {
+      clearTimeout(timeout);
+      const endTime = new Date().toISOString();
+      
+      console.log(`[${endTime}] Python command completed with code: ${code}`);
+      if (stdout) console.log(`[${endTime}] STDOUT: ${stdout.substring(0, 200)}${stdout.length > 200 ? '...' : ''}`);
+      if (stderr) console.log(`[${endTime}] STDERR: ${stderr.substring(0, 200)}${stderr.length > 200 ? '...' : ''}`);
+      
       if (code === 0) {
         try {
           // Try to parse as JSON, fallback to string
           const result = stdout.trim();
+          if (result.startsWith('ERROR:')) {
+            reject(new Error(result));
+            return;
+          }
+          
           if (result.startsWith('{') || result.startsWith('[')) {
             resolve(JSON.parse(result));
           } else {
             resolve(result);
           }
         } catch (e) {
+          console.log(`[${endTime}] JSON parse failed, returning raw string: ${e.message}`);
           resolve(stdout.trim());
         }
       } else {
-        reject(new Error(`Python execution failed: ${stderr || stdout}`));
+        const error = `Python execution failed (code ${code}): ${stderr || stdout || 'Unknown error'}`;
+        console.error(`[${endTime}] ${error}`);
+        reject(new Error(error));
       }
     });
   });
@@ -75,10 +105,9 @@ ${command}
  */
 async function addMemory(content, metadata = {}) {
   try {
-    const command = `
-result = memory.add("${content.replace(/"/g, '\\"')}", ${JSON.stringify(metadata)})
-print(f'{{"success": True, "id": "{result}", "message": "Memory added successfully"}}')
-`;
+    const safeContent = content.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+    const safeMetadata = JSON.stringify(metadata).replace(/"/g, '\\"');
+    const command = `result = memory.add("${safeContent}", ${safeMetadata}); print(f'{"success": True, "id": "{result}", "message": "Memory added successfully"}')`;
     return await executePython(command);
   } catch (error) {
     throw new Error(`Failed to add memory: ${error.message}`);
@@ -90,11 +119,8 @@ print(f'{{"success": True, "id": "{result}", "message": "Memory added successful
  */
 async function searchMemories(query, limit = 10) {
   try {
-    const command = `
-import json
-results = memory.search("${query.replace(/"/g, '\\"')}", limit=${limit})
-print(json.dumps(results))
-`;
+    const safeQuery = query.replace(/"/g, '\\"');
+    const command = `import json; results = memory.search("${safeQuery}", limit=${limit}); print(json.dumps(results))`;
     const results = await executePython(command);
     return Array.isArray(results) ? results : [];
   } catch (error) {
@@ -107,11 +133,7 @@ print(json.dumps(results))
  */
 async function listMemories(limit = 100) {
   try {
-    const command = `
-import json
-results = memory.get_all()[:${limit}]
-print(json.dumps(results))
-`;
+    const command = `import json; results = memory.get_all()[:${limit}]; print(json.dumps(results))`;
     const results = await executePython(command);
     return Array.isArray(results) ? results : [];
   } catch (error) {
@@ -124,10 +146,8 @@ print(json.dumps(results))
  */
 async function getContext(topic, limit = 5) {
   try {
-    const command = `
-context = memory.get_context("${topic.replace(/"/g, '\\"')}", limit=${limit})
-print(context)
-`;
+    const safeTopic = topic.replace(/"/g, '\\"');
+    const command = `context = memory.get_context("${safeTopic}", limit=${limit}); print(context)`;
     return await executePython(command);
   } catch (error) {
     throw new Error(`Failed to get context: ${error.message}`);
@@ -458,10 +478,45 @@ function createHTTPServer() {
 }
 
 /**
+ * Test Python integration on startup
+ */
+async function testPythonIntegration() {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] Testing Python integration...`);
+  console.log(`[${timestamp}] Python path: ${PYTHON_PATH}`);
+  console.log(`[${timestamp}] Working directory: ${process.cwd()}`);
+  console.log(`[${timestamp}] Memory file: ${MEMORY_FILE}`);
+  
+  try {
+    const result = await executePython('print(len(memory.get_all()))');
+    console.log(`[${timestamp}] Python integration test: ✅ SUCCESS`);
+    console.log(`[${timestamp}] Memory count: ${result}`);
+    return true;
+  } catch (error) {
+    console.error(`[${timestamp}] Python integration test: ❌ FAILED`);
+    console.error(`[${timestamp}] Error: ${error.message}`);
+    return false;
+  }
+}
+
+/**
  * Main function
  */
 async function main() {
+  const startTime = new Date().toISOString();
+  console.log(`[${startTime}] ====================================`);
+  console.log(`[${startTime}] Universal Memory MCP Server Starting`);
+  console.log(`[${startTime}] ====================================`);
+  
+  // Test Python integration first
+  const pythonOk = await testPythonIntegration();
+  if (!pythonOk) {
+    console.error('Python integration failed. Server cannot start.');
+    process.exit(1);
+  }
+  
   const mode = process.env.MODE || 'mcp';
+  console.log(`[${startTime}] Server mode: ${mode}`);
   
   if (mode === 'http' || mode === 'both') {
     console.log('Starting HTTP API server...');
@@ -478,16 +533,17 @@ async function main() {
   }
   
   if (mode === 'mcp' || mode === 'both') {
-    console.log('Starting MCP server...');
-    console.log(`Memory file: ${MEMORY_FILE}`);
+    console.log(`[${startTime}] Starting MCP server...`);
+    console.log(`[${startTime}] Memory file: ${MEMORY_FILE}`);
     
     try {
       const server = createMCPServer();
       const transport = new StdioServerTransport();
       await server.connect(transport);
-      console.log('MCP server started successfully');
+      console.log(`[${startTime}] MCP server started successfully`);
+      console.log(`[${startTime}] Available tools: add_memory, search_memory, get_context, list_memories, clear_memories`);
     } catch (error) {
-      console.error('Failed to start MCP server:', error);
+      console.error(`[${startTime}] Failed to start MCP server:`, error);
       process.exit(1);
     }
   }

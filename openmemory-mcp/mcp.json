@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "universal-memory": {
+      "command": "node",
+      "args": ["/Users/somnathchakraborty/Paytm/toolkits/openmemory-mcp/simple_mcp_server.js"],
+      "cwd": "/Users/somnathchakraborty/Paytm/toolkits/openmemory-mcp",
+      "env": {
+        "MODE": "mcp",
+        "PYTHON_PATH": "/Users/somnathchakraborty/Paytm/openmemory/bin/python3",
+        "MEMORY_FILE": "/Users/somnathchakraborty/.universal_memory/memories.json",
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
